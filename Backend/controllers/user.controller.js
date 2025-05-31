@@ -72,6 +72,7 @@ export const purchaseCourse = async (req, res) => {
             success_url: `${origin}/loadin/my-enrollments`,
             cancel_url: `${origin}/`,
             line_items: line_items,
+            billing_address_collection: 'required',
             mode: 'payment',
             metadata: {
                 purchaseId: newPurchase._id.toString()
