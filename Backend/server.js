@@ -19,7 +19,7 @@ await connectCloudinary()
 
 // Middlewares
 app.use(cors())
-app.use(express.json())
+// app.use(express.json())
 app.use(clerkMiddleware())
 app.use(express.urlencoded({ extended: true }));
 
@@ -29,10 +29,10 @@ app.get('/', (req, res) => {
   res.send("You are requesting to Server")
 })
 
-app.post('/clerk', clerkWebhooks)
-app.use('/api/educator', educatorRouter)
-app.use('/api/course', courseRouter)
-app.use('/api/user', userRouter)
+app.post('/clerk', express.json(), clerkWebhooks)
+app.use('/api/educator', express.json(), educatorRouter)
+app.use('/api/course', express.json(), courseRouter)
+app.use('/api/user', express.json(), userRouter)
 
 // Seperate End point / API for payment
 app.post('/stripe', express.raw({ type: 'application/json'}), stripeWebhooks)
