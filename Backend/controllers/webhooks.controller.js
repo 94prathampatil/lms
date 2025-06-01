@@ -80,25 +80,30 @@ export const stripeWebhooks = async (req, res) => {
             const paymentIntentId = paymentIntent.id;
             const session = await stripeInstance.checkout.sessions.list({
                 payment_intent: paymentIntentId
-            })
-
+            });
+    
             const { purchaseId } = session.data[0].metadata;
-
-            const purchaseData = await Purchase.findById(purchaseId)
-            const userData = await User.findById(purchaseData.userId)
-            const courseData = await Course.findById(purchaseData.courseId.toString())
-
-            courseData.enrolledStudents.push(userData)
-            await courseData.save()
-
-            userData.enrolledCourses.push(courseData._id)
-            await userData.save();
-
-            purchaseData.status = 'completed'
-            await purchaseData.save()
-
+    
+            const purchaseData = await Purchase.findById(purchaseId);
+            if (!purchaseData) break;
+            const userData = await User.findById(purchaseData.userId);
+            const courseData = await Course.findById(purchaseData.courseId.toString());
+    
+            if (courseData && userData) {
+                // Only push IDs, not objects
+                if (!courseData.enrolledStudents.includes(userData._id)) {
+                    courseData.enrolledStudents.push(userData._id);
+                    await courseData.save();
+                }
+                if (!userData.enrolledCourses.includes(courseData._id)) {
+                    userData.enrolledCourses.push(courseData._id);
+                    await userData.save();
+                }
+                purchaseData.status = 'completed';
+                await purchaseData.save();
+            }
             break;
-        }
+        }   
         case 'payment_intent.payment_failed': {
             const paymentIntent = event.data.object;
             const paymentIntentId = paymentIntent.id;
