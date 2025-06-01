@@ -1,5 +1,5 @@
 import Stripe from "stripe"
-import Purchase from "../models/purchase.Schema.js"
+import {Purchase} from "../models/purchase.Schema.js"
 import User from "../models/user.Schema.js"
 import Course from "../models/course.Schema.js"
 
@@ -46,8 +46,7 @@ export const purchaseCourse = async (req, res) => {
         const purchaseData = {
             courseId: courseData._id,
             userId,
-            amount: Number((courseData.coursePrice - courseData.discount * courseData.coursePrice / 100).toFixed(2)),
-            status: 'pending'
+            amount: ((courseData.coursePrice - courseData.discount * courseData.coursePrice / 100).toFixed(2)),
         }
 
         const newPurchase = await Purchase.create(purchaseData)

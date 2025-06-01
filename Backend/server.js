@@ -35,7 +35,7 @@ app.use('/api/course', courseRouter)
 app.use('/api/user', userRouter)
 
 // Seperate End point / API for payment
-app.post('/api/stripe', express.raw({ type: 'application/json'}), stripeWebhooks)
+app.post('/stripe', express.raw({ type: 'application/json'}), stripeWebhooks)
 
 // Port
 const PORT = process.env.PORT || 5000
