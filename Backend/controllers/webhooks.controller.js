@@ -64,14 +64,14 @@ const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 export const stripeWebhooks = async (req, res) => {
     const sig = req.headers['stripe-signature'];
-
     let event;
-    
+
     try {
         event = Stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
     }
     catch (error) {
-        res.status(400).send(`Webhook Error: ${err.message}`)
+        res.status(400).send(`Webhook Error: ${error.message}`)
+        return; // <-- This is critical!
     }
 
     switch (event.type) {
@@ -81,16 +81,16 @@ export const stripeWebhooks = async (req, res) => {
             const session = await stripeInstance.checkout.sessions.list({
                 payment_intent: paymentIntentId
             });
-    
+
+            if (!session.data.length || !session.data[0].metadata) break;
             const { purchaseId } = session.data[0].metadata;
-    
+
             const purchaseData = await Purchase.findById(purchaseId);
             if (!purchaseData) break;
             const userData = await User.findById(purchaseData.userId);
             const courseData = await Course.findById(purchaseData.courseId.toString());
-    
+
             if (courseData && userData) {
-                // Only push IDs, not objects
                 if (!courseData.enrolledStudents.includes(userData._id)) {
                     courseData.enrolledStudents.push(userData._id);
                     await courseData.save();
@@ -103,7 +103,7 @@ export const stripeWebhooks = async (req, res) => {
                 await purchaseData.save();
             }
             break;
-        }   
+        }
         case 'payment_intent.payment_failed': {
             const paymentIntent = event.data.object;
             const paymentIntentId = paymentIntent.id;
