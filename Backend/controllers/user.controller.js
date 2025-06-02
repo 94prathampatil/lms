@@ -25,7 +25,7 @@ export const userEnrolledCourses = async (req, res) => {
         const userId = req.auth.userId
         const userData = await User.findById(userId).populate('enrolledCourses')
 
-        res.json({success:true, enrolledCourse: userData.enrolledCourses})
+        res.json({success:true, enrolledCourses: userData.enrolledCourses})
     } catch (error) {
         res.json({ success:false, message:error.message})
     }
@@ -39,7 +39,7 @@ export const purchaseCourse = async (req, res) => {
         const userId = req.auth.userId
         const userData = await User.findById(userId)
         const courseData = await Course.findById(courseId)
-
+        const baseUrl = origin || "http://localhost:5173";
         if(!userData || !courseData) {
             return res.json({success:false, message:"User or Course not found"})
         }
@@ -69,8 +69,8 @@ export const purchaseCourse = async (req, res) => {
         }]
 
         const session = await stripeInstance.checkout.sessions.create({
-            success_url: `${origin}loading/my-enrollments`,
-            cancel_url: `${origin}`,
+            success_url: `${baseUrl}/loading/my-enrollments`,
+            cancel_url: `${baseUrl}`,
             line_items: line_items,
             billing_address_collection: 'required',
             mode: 'payment',
@@ -161,7 +161,7 @@ export const addUserRating = async (req, res) => {
             course.courseRatings.push({userId, rating})
         }
 
-        await couresData.save()
+        await course.save()
 
         return res.json({success:true, message:"Rating Added"})
     } catch (error) {

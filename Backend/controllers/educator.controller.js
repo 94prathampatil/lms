@@ -3,6 +3,7 @@ import {clerkClient} from "@clerk/express";
 import Course from "../models/course.Schema.js";
 import {v2 as cloudinary} from "cloudinary"
 import {Purchase} from "../models/purchase.Schema.js";
+import User from "../models/user.Schema.js";
 
 
 export const updateRoleToEducator = async (req, res) => {
